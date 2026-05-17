@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nested CES Labor Market · Taste-Based Discrimination</title>
-  <meta name="description" content="Interactive nested CES model with Becker taste-based discrimination and equal-pay mandate comparative statics.">
+  <meta name="description" content="Interactive nested CES model with observed wage markdowns, Becker taste-based discrimination, and equal-pay mandate comparative statics.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', system-ui, sans-serif; background: #f1f5f9; color: #0f172a; line-height: 1.6; font-size: 14px; }
@@ -31,7 +31,7 @@
     .g4     { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
     .g-main { display: grid; grid-template-columns: minmax(315px, 340px) minmax(0, 1fr); gap: 12px; }
 
-    .eq     { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #475569; line-height: 2.1; }
+    .eq     { font-family: 'Inter', system-ui, sans-serif; font-size: 0.7rem; color: #475569; line-height: 2.1; font-variant-numeric: tabular-nums; }
     .eq b   { color: #1e293b; font-weight: 500; }
     .eq .rd { color: #dc2626; }
     .eq .gr { color: #16a34a; }
@@ -39,7 +39,7 @@
     .prow       { display: grid; grid-template-columns: minmax(118px, 1fr) minmax(0, 120px) 42px; align-items: center; gap: 8px; margin-bottom: 0.85rem; width: 100%; }
     .prow label { font-size: 0.74rem; color: #64748b; min-width: 0; line-height: 1.3; }
     .prow input[type=range] { width: 100%; min-width: 0; cursor: pointer; }
-    .prow .pv   { font-size: 0.78rem; font-weight: 600; min-width: 0; text-align: right; font-family: 'JetBrains Mono', monospace; }
+    .prow .pv   { font-size: 0.78rem; font-weight: 600; min-width: 0; text-align: right; font-family: 'Inter', system-ui, sans-serif; font-variant-numeric: tabular-nums; }
     .prow.disc  input { accent-color: #db2777; }
     .prow.disc  .pv   { color: #db2777; }
     .prow.elas  input { accent-color: #4f46e5; }
@@ -60,7 +60,7 @@
     .gap-wrap { height: 165px; }
 
     .info-row   { font-size: 0.71rem; color: #64748b; line-height: 2.2; }
-    .info-row b { color: #334155; font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+    .info-row b { color: #334155; font-family: 'Inter', system-ui, sans-serif; font-weight: 600; font-variant-numeric: tabular-nums; }
 
     .chart-wrap   { position: relative; height: 185px; margin-top: 6px; }
     .chart-legend { display: flex; gap: 14px; font-size: 0.7rem; color: #64748b; margin-bottom: 2px; }
@@ -108,7 +108,7 @@
 <header class="hdr">
   <div>
     <h1>Nested CES Labor Market · Taste-Based Discrimination</h1>
-    <p>Two independent equal-pay switches for high- and low-skill women — direct markdown/cost-wedge parameters by tier</p>
+    <p>Two independent equal-pay switches for high- and low-skill women — observed wage markdowns by tier</p>
   </div>
   <div style="text-align:right">
     <button class="share-btn" onclick="copyLink()">
@@ -133,7 +133,7 @@
         <div class="eq">
           <b>H</b> = [α·L<sub>MH</sub><sup>ρH</sup> + α·L<sub>FH</sub><sup>ρH</sup>]<sup>1/ρH</sup><br>
           ρH = (σ<sub>wH</sub>−1)/σ<sub>wH</sub>, α = 0.5<br>
-          <span class="rd">markdown m<sub>H</sub>: w̃<sub>FH</sub> = (1+m<sub>H</sub>)·w<sub>FH</sub></span>
+          <span class="rd">markdown r<sub>H</sub>: w<sub>FH</sub> = 1−r<sub>H</sub>, perceived cost = 1</span>
         </div>
       </div>
       <div class="card-sm">
@@ -141,7 +141,7 @@
         <div class="eq">
           <b>L</b> = [α·L<sub>ML</sub><sup>ρL</sup> + α·L<sub>FL</sub><sup>ρL</sup>]<sup>1/ρL</sup><br>
           ρL = (σ<sub>wL</sub>−1)/σ<sub>wL</sub>, α = 0.5<br>
-          <span class="gr">markdown m<sub>L</sub>: w̃<sub>FL</sub> = (1+m<sub>L</sub>)·w<sub>FL</sub></span>
+          <span class="gr">markdown r<sub>L</sub>: w<sub>FL</sub> = 1−r<sub>L</sub>, perceived cost = 1</span>
         </div>
       </div>
       <div class="card-sm">
@@ -162,14 +162,14 @@
       <!-- Left: sliders -->
       <div class="card" style="align-self:start">
 
-        <div class="sec-label">Wage markdown / perceived cost wedge</div>
+        <div class="sec-label">Observed wage markdown</div>
         <div class="prow disc">
-          <label>High-skill markdown m<sub>H</sub></label>
+          <label>High-skill wage markdown r<sub>H</sub></label>
           <input type="range" id="dh" min="0" max="1" step="0.05" value="0.4">
           <span class="pv" id="dhv">40%</span>
         </div>
         <div class="prow disc">
-          <label>Low-skill markdown m<sub>L</sub></label>
+          <label>Low-skill wage markdown r<sub>L</sub></label>
           <input type="range" id="dl" min="0" max="1" step="0.05" value="0.4">
           <span class="pv" id="dlv">40%</span>
         </div>
@@ -320,7 +320,7 @@
     <div class="card">
       <div class="g2 interp">
         <div>
-          <p><b>Baseline markdown.</b> Each skill tier has its own direct markdown/cost-wedge parameter: m<sub>H</sub> for high-skill and m<sub>L</sub> for low-skill women. Firms act as if female workers cost (1+m)·w<sub>F</sub> in each tier. In the pre-policy equilibrium, women earn below their MPL — w<sub>FH</sub> = 1/(1+m<sub>H</sub>) and w<sub>FL</sub> = 1/(1+m<sub>L</sub>) — while effective costs are symmetric at 1. Thus m = 0 means no discrimination, and m = 1 means the firm behaves as if the female wage were twice as high.</p>
+          <p><b>Baseline markdown.</b> Each skill tier has its own observed wage markdown r<sub>H</sub> or r<sub>L</sub>. A markdown of r = 0.40 means women are paid 60% of the male wage: w<sub>F</sub> = 1 − r = 0.60. The implied taste/perceived-cost multiplier is φ = 1/(1−r), so the firm treats a woman paid 0.60 as if she cost 1.00 before the mandate. Under an equal-pay mandate, the paid wage becomes 1; if the discriminatory taste wedge remains, the firm’s perceived cost becomes φ = 1/(1−r).</p>
           <p><b>Two independent switches.</b> The high-skill switch forces w<sub>FH</sub> = w<sub>MH</sub>; the low-skill switch forces w<sub>FL</sub> = w<sub>ML</sub>. If a switch is off, that tier stays at the discriminating baseline. If a switch is on, the woman's actual wage rises to the male wage, while the firm's perceived cost rises to 1+m in that tier.</p>
         </div>
         <div>
@@ -399,7 +399,8 @@ function pct(from, to) {
 }
 
 function thresholdLabel(markdown) {
-  return markdown <= 0 ? 'not defined when m = 0' : `rough local threshold σ > 1/m = ${(1 / markdown).toFixed(1)}`;
+  const phi = 1 / (1 - markdown);
+  return markdown <= 0 ? 'no markdown' : `implied perceived-cost multiplier φ = ${phi.toFixed(2)}`;
 }
 
 // ── Charts ────────────────────────────────────────────────────────────────────
@@ -464,30 +465,30 @@ const GROUPS = [
 // ── Main update ───────────────────────────────────────────────────────────────
 
 function update() {
-  const mH  = +document.getElementById('dh').value;
-  const mL  = +document.getElementById('dl').value;
+  const rH  = +document.getElementById('dh').value;
+  const rL  = +document.getElementById('dl').value;
   const sWH = +document.getElementById('swh').value;
   const sWL = +document.getElementById('swl').value;
   const sB  = +document.getElementById('sb').value;
   const mandH = document.getElementById('mandH').checked;
   const mandL = document.getElementById('mandL').checked;
 
-  document.getElementById('dhv').textContent  = (mH * 100).toFixed(0) + '%';
-  document.getElementById('dlv').textContent  = (mL * 100).toFixed(0) + '%';
+  document.getElementById('dhv').textContent  = (rH * 100).toFixed(0) + '%';
+  document.getElementById('dlv').textContent  = (rL * 100).toFixed(0) + '%';
   document.getElementById('swhv').textContent = sWH.toFixed(1);
   document.getElementById('swlv').textContent = sWL.toFixed(1);
   document.getElementById('sbv').textContent  = sB.toFixed(2);
 
   const preWFH_eff  = 1;
   const preWFL_eff  = 1;
-  const postWFH_eff = mandH ? 1 + mH : 1;
-  const postWFL_eff = mandL ? 1 + mL : 1;
+  const postWFH_eff = mandH ? 1 / (1 - rH) : 1;
+  const postWFL_eff = mandL ? 1 / (1 - rL) : 1;
 
   const pre  = computeEquil(sWH, sWL, sB, preWFH_eff,  preWFL_eff);
   const post = computeEquil(sWH, sWL, sB, postWFH_eff, postWFL_eff);
 
-  const wPre  = { MH: 1, FH: 1/(1+mH), ML: 1, FL: 1/(1+mL) };
-  const wPost = { MH: 1, FH: mandH ? 1 : 1/(1+mH), ML: 1, FL: mandL ? 1 : 1/(1+mL) };
+  const wPre  = { MH: 1, FH: 1 - rH, ML: 1, FL: 1 - rL };
+  const wPost = { MH: 1, FH: mandH ? 1 : 1 - rH, ML: 1, FL: mandL ? 1 : 1 - rL };
 
   const ep    = { MH: pre.LMH,  FH: pre.LFH,  ML: pre.LML,  FL: pre.LFL  };
   const epo   = { MH: post.LMH, FH: post.LFH, ML: post.LML, FL: post.LFL };
@@ -496,8 +497,8 @@ function update() {
   const bPost = { MH: epo.MH*wPost.MH, FH: epo.FH*wPost.FH, ML: epo.ML*wPost.ML, FL: epo.FL*wPost.FL };
 
   // Sidebar
-  document.getElementById('wfhpre').textContent  = (1/(1+mH)).toFixed(3);
-  document.getElementById('wflpre').textContent  = (1/(1+mL)).toFixed(3);
+  document.getElementById('wfhpre').textContent  = (1 - rH).toFixed(3);
+  document.getElementById('wflpre').textContent  = (1 - rL).toFixed(3);
   document.getElementById('chpre').textContent   = pre.cH.toFixed(3);
   document.getElementById('chpost').textContent  = post.cH.toFixed(3);
   document.getElementById('clpre').textContent   = pre.cL.toFixed(3);
@@ -563,30 +564,30 @@ function update() {
   let [mhKind, mhText] = empKind(ep.MH, epo.MH);
   setBadge('mh_badge', mhText, mhKind);
   document.getElementById('ic_mh').textContent = mandH
-    ? `Wage unchanged. Employment ${pct(ep.MH, epo.MH)}: the high-skill mandate raises FH effective cost to ${(1+mH).toFixed(2)}, so firms substitute toward MH inside the H nest (σwH = ${sWH}).`
+    ? `Wage unchanged. Employment ${pct(ep.MH, epo.MH)}: the high-skill mandate raises FH effective cost to ${(1/(1-rH)).toFixed(2)}, so firms substitute toward MH inside the H nest (σwH = ${sWH}).`
     : `Wage unchanged. Employment ${pct(ep.MH, epo.MH)}. The high-skill switch is off, so any change comes from outer-nest reallocation caused by the low-skill switch.`;
 
   const fhBill = bPost.FH < bPre.FH;
   setBadge('fh_badge', mandH ? (fhBill ? 'paradox' : 'net gain') : 'off', mandH ? (fhBill ? 'paradox' : 'gain') : 'flat');
   document.getElementById('ic_fh').textContent = mandH
-    ? `Wage +${(mH*100).toFixed(0)}%. Employment ${pct(ep.FH, epo.FH)}. Group wage bill ${pct(bPre.FH, bPost.FH)} — ${thresholdLabel(mH)}.`
-    : `Switch off: wage remains ${(1/(1+mH)).toFixed(3)} = 1/(1+mH). Employment ${pct(ep.FH, epo.FH)} through outer-nest reallocation only.`;
+    ? `Wage rises from ${(1-rH).toFixed(2)} to 1. Employment ${pct(ep.FH, epo.FH)}. Group wage bill ${pct(bPre.FH, bPost.FH)} — ${thresholdLabel(rH)}.`
+    : `Switch off: wage remains ${(1-rH).toFixed(3)} = 1−rH. Employment ${pct(ep.FH, epo.FH)} through outer-nest reallocation only.`;
 
   let [mlKind, mlText] = empKind(ep.ML, epo.ML);
   setBadge('ml_badge', mlText, mlKind);
   document.getElementById('ic_ml').textContent = mandL
-    ? `Wage unchanged. Employment ${pct(ep.ML, epo.ML)}: the low-skill mandate raises FL effective cost to ${(1+mL).toFixed(2)}, so firms substitute toward ML inside the L nest (σwL = ${sWL}).`
+    ? `Wage unchanged. Employment ${pct(ep.ML, epo.ML)}: the low-skill mandate raises FL effective cost to ${(1/(1-rL)).toFixed(2)}, so firms substitute toward ML inside the L nest (σwL = ${sWL}).`
     : `Wage unchanged. Employment ${pct(ep.ML, epo.ML)}. The low-skill switch is off, so any change comes from outer-nest reallocation caused by the high-skill switch.`;
 
   const flBill = bPost.FL < bPre.FL;
   setBadge('fl_badge', mandL ? (flBill ? 'paradox' : 'net gain') : 'off', mandL ? (flBill ? 'paradox' : 'gain') : 'flat');
   document.getElementById('ic_fl').textContent = mandL
-    ? `Wage +${(mL*100).toFixed(0)}%. Employment ${pct(ep.FL, epo.FL)}. Group wage bill ${pct(bPre.FL, bPost.FL)} — ${thresholdLabel(mL)}.`
-    : `Switch off: wage remains ${(1/(1+mL)).toFixed(3)} = 1/(1+mL). Employment ${pct(ep.FL, epo.FL)} through outer-nest reallocation only.`;
+    ? `Wage rises from ${(1-rL).toFixed(2)} to 1. Employment ${pct(ep.FL, epo.FL)}. Group wage bill ${pct(bPre.FL, bPost.FL)} — ${thresholdLabel(rL)}.`
+    : `Switch off: wage remains ${(1-rL).toFixed(3)} = 1−rL. Employment ${pct(ep.FL, epo.FL)} through outer-nest reallocation only.`;
 
   // Encode parameters in URL
   const url = new URL(window.location);
-  [['mh', mH], ['ml', mL], ['swh', sWH], ['swl', sWL], ['sb', sB]].forEach(([k, v]) =>
+  [['mh', rH], ['ml', rL], ['swh', sWH], ['swl', sWL], ['sb', sB]].forEach(([k, v]) =>
     url.searchParams.set(k, v)
   );
   url.searchParams.delete('dh');
