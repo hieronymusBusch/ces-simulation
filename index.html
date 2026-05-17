@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nested CES Labor Market · Taste-Based Discrimination</title>
+  <meta name="description" content="Interactive nested CES model with Becker taste-based discrimination and equal-pay mandate comparative statics.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: #f1f5f9; color: #0f172a; line-height: 1.6; font-size: 14px; }
+
+    .hdr { background: #0f172a; color: #f8fafc; padding: 1.25rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .hdr h1 { font-size: 1.05rem; font-weight: 600; letter-spacing: -0.02em; }
+    .hdr p  { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
+    .share-btn { background: #4f46e5; color: white; border: none; padding: 0.45rem 1rem; border-radius: 6px; font-size: 0.75rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background .2s; font-family: inherit; }
+    .share-btn:hover { background: #4338ca; }
+    .share-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .copy-msg { font-size: 0.7rem; color: #86efac; margin-top: 4px; display: none; }
+
+    .main    { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+    .section { margin-bottom: 1.5rem; }
+    .sec-label { font-size: 0.63rem; text-transform: uppercase; letter-spacing: .1em; font-weight: 600; color: #94a3b8; margin-bottom: 0.55rem; }
+
+    .card    { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.1rem 1.25rem; }
+    .card-sm { background: white; border: 1px solid #e2e8f0; border-radius: 8px;  padding: 0.85rem 1rem; }
+
+    .g3     { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .g2     { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .g4     { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .g-main { display: grid; grid-template-columns: 270px 1fr; gap: 12px; }
+
+    .eq     { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #475569; line-height: 2.1; }
+    .eq b   { color: #1e293b; font-weight: 500; }
+    .eq .rd { color: #dc2626; }
+    .eq .gr { color: #16a34a; }
+
+    .prow       { display: flex; align-items: center; gap: 8px; margin-bottom: 0.85rem; }
+    .prow label { font-size: 0.74rem; color: #64748b; flex: 0 0 158px; }
+    .prow input[type=range] { flex: 1; cursor: pointer; }
+    .prow .pv   { font-size: 0.78rem; font-weight: 600; min-width: 36px; text-align: right; font-family: 'JetBrains Mono', monospace; }
+    .prow.disc  input { accent-color: #db2777; }
+    .prow.disc  .pv   { color: #db2777; }
+    .prow.elas  input { accent-color: #4f46e5; }
+    .prow.elas  .pv   { color: #4f46e5; }
+
+    .pg-div { border-top: 1px solid #f1f5f9; margin: 0.85rem 0; padding-top: 0.85rem; }
+
+    .info-row   { font-size: 0.71rem; color: #64748b; line-height: 2.2; }
+    .info-row b { color: #334155; font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+
+    .chart-wrap   { position: relative; height: 185px; margin-top: 6px; }
+    .chart-legend { display: flex; gap: 14px; font-size: 0.7rem; color: #64748b; margin-bottom: 2px; }
+    .swatch       { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 4px; vertical-align: middle; }
+
+    table    { width: 100%; border-collapse: collapse; font-size: 0.71rem; }
+    thead tr { background: #f8fafc; }
+    th       { padding: 0.45rem 0.6rem; text-align: right; font-weight: 600; color: #64748b; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
+    th:first-child { text-align: left; }
+    td       { padding: 0.45rem 0.6rem; text-align: right; border-bottom: 1px solid #f1f5f9; color: #334155; }
+    td:first-child { text-align: left; font-weight: 500; }
+    tr:hover td { background: #fafafa; }
+    .up { color: #16a34a; font-weight: 600; }
+    .dn { color: #dc2626; font-weight: 600; }
+    .nt { color: #94a3b8; }
+
+    .ic     { border-radius: 8px; padding: 1rem; border: 1px solid #e2e8f0; border-top-width: 3px; }
+    .ic-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .ic-nm  { font-size: 0.82rem; font-weight: 600; }
+    .ic p   { font-size: 0.7rem; color: #64748b; line-height: 1.65; margin: 0; }
+    .badge  { font-size: 0.6rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+
+    .callout { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.73rem; color: #1e40af; line-height: 1.75; margin-top: 1rem; }
+    .note    { background: #fefce8; border: 1px solid #fde68a; border-radius: 8px; padding: 0.65rem 1rem; font-size: 0.7rem; color: #78350f; line-height: 1.7; margin-top: 0.75rem; }
+
+    .interp p   { font-size: 0.76rem; color: #475569; line-height: 1.8; margin-bottom: 0.75rem; }
+    .interp p:last-child { margin-bottom: 0; }
+    .interp b   { color: #1e293b; }
+
+    .footer { text-align: center; padding: 1.5rem; font-size: 0.69rem; color: #94a3b8; }
+
+    @media (max-width: 800px) {
+      .g3, .g4, .g-main, .g2 { grid-template-columns: 1fr; }
+      .main { padding: 1rem; }
+      .hdr  { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="hdr">
+  <div>
+    <h1>Nested CES Labor Market · Taste-Based Discrimination</h1>
+    <p>Equal-pay mandate (high-skill women only) — separate discrimination and elasticity parameters by skill tier</p>
+  </div>
+  <div style="text-align:right">
+    <button class="share-btn" onclick="copyLink()">
+      <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z"/>
+        <path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z"/>
+      </svg>
+      Copy shareable link
+    </button>
+    <div class="copy-msg" id="copyMsg">✓ Link copied — all 5 parameters encoded in URL</div>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- Model structure -->
+  <div class="section">
+    <div class="sec-label">Model structure</div>
+    <div class="g3">
+      <div class="card-sm">
+        <div class="sec-label" style="margin-bottom:4px">High-skill inner nest (σ<sub>wH</sub>)</div>
+        <div class="eq">
+          <b>H</b> = [α·L<sub>MH</sub><sup>ρH</sup> + α·L<sub>FH</sub><sup>ρH</sup>]<sup>1/ρH</sup><br>
+          ρH = (σ<sub>wH</sub>−1)/σ<sub>wH</sub>, α = 0.5<br>
+          <span class="rd">disc. d<sub>H</sub>: w̃<sub>FH</sub> = (1+d<sub>H</sub>)·w<sub>FH</sub></span>
+        </div>
+      </div>
+      <div class="card-sm">
+        <div class="sec-label" style="margin-bottom:4px">Low-skill inner nest (σ<sub>wL</sub>)</div>
+        <div class="eq">
+          <b>L</b> = [α·L<sub>ML</sub><sup>ρL</sup> + α·L<sub>FL</sub><sup>ρL</sup>]<sup>1/ρL</sup><br>
+          ρL = (σ<sub>wL</sub>−1)/σ<sub>wL</sub>, α = 0.5<br>
+          <span class="gr">disc. d<sub>L</sub>: w̃<sub>FL</sub> = (1+d<sub>L</sub>)·w<sub>FL</sub></span>
+        </div>
+      </div>
+      <div class="card-sm">
+        <div class="sec-label" style="margin-bottom:4px">Outer nest (σ<sub>b</sub>) &amp; policy</div>
+        <div class="eq">
+          <b>Y</b> = [β·H<sup>γ</sup> + β·L<sup>γ</sup>]<sup>1/γ</sup><br>
+          γ = (σ<sub>b</sub>−1)/σ<sub>b</sub>, β = 0.5<br>
+          <span class="rd">Policy: force w<sub>FH</sub> = w<sub>MH</sub> only</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Parameters + Charts -->
+  <div class="section">
+    <div class="g-main">
+
+      <!-- Left: sliders -->
+      <div class="card" style="align-self:start">
+
+        <div class="sec-label">Discrimination parameters</div>
+        <div class="prow disc">
+          <label>High-skill disc. d<sub>H</sub></label>
+          <input type="range" id="dh" min="0.02" max="0.6" step="0.02" value="0.2">
+          <span class="pv" id="dhv">0.20</span>
+        </div>
+        <div class="prow disc">
+          <label>Low-skill disc. d<sub>L</sub></label>
+          <input type="range" id="dl" min="0.02" max="0.6" step="0.02" value="0.2">
+          <span class="pv" id="dlv">0.20</span>
+        </div>
+
+        <div class="pg-div">
+          <div class="sec-label">Substitution elasticities</div>
+        </div>
+        <div class="prow elas">
+          <label>Within high-skill σ<sub>wH</sub></label>
+          <input type="range" id="swh" min="1.5" max="10" step="0.5" value="5">
+          <span class="pv" id="swhv">5.0</span>
+        </div>
+        <div class="prow elas">
+          <label>Within low-skill σ<sub>wL</sub></label>
+          <input type="range" id="swl" min="1.5" max="10" step="0.5" value="5">
+          <span class="pv" id="swlv">5.0</span>
+        </div>
+        <div class="prow elas">
+          <label>Between tiers σ<sub>b</sub></label>
+          <input type="range" id="sb"  min="0.1" max="0.95" step="0.05" value="0.5">
+          <span class="pv" id="sbv">0.50</span>
+        </div>
+
+        <div class="pg-div">
+          <div class="sec-label">Baseline wages (pre-policy)</div>
+        </div>
+        <div class="info-row">
+          Male high &amp; low: <b>1.000</b><br>
+          Female high: <b id="wfhpre">0.833</b> = 1/(1+d<sub>H</sub>)<br>
+          Female low: <b id="wflpre">0.833</b> = 1/(1+d<sub>L</sub>)
+        </div>
+
+        <div class="pg-div">
+          <div class="sec-label">H composite unit cost</div>
+        </div>
+        <div class="info-row">
+          Pre-policy c<sub>H</sub>: <b id="chpre">2.000</b><br>
+          Post-policy c<sub>H</sub>: <b id="chpost">2.156</b><br>
+          c<sub>L</sub> (pre &amp; post): <b>2.000</b>
+        </div>
+      </div>
+
+      <!-- Right: charts -->
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="card">
+          <div class="sec-label">Wages <span style="text-transform:none;letter-spacing:0;font-weight:400;color:#94a3b8">(male wage = 1)</span></div>
+          <div class="chart-legend">
+            <span><span class="swatch" style="background:#4f46e5"></span>Pre-policy</span>
+            <span><span class="swatch" style="background:#d97706"></span>Post-policy</span>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="wChart" role="img" aria-label="Grouped bar chart comparing wages before and after the equal-pay mandate for all four labor groups">Chart loading…</canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="sec-label">Employment <span style="text-transform:none;letter-spacing:0;font-weight:400;color:#94a3b8">(pre-policy = 1 for all groups)</span></div>
+          <div class="chart-legend">
+            <span><span class="swatch" style="background:#4f46e5"></span>Pre-policy</span>
+            <span><span class="swatch" style="background:#d97706"></span>Post-policy</span>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="eChart" role="img" aria-label="Grouped bar chart comparing employment before and after the equal-pay mandate for all four labor groups">Chart loading…</canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results table -->
+  <div class="section">
+    <div class="sec-label">Comparative statics — full table</div>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th style="text-align:left">Group</th>
+            <th>Wage pre</th><th>Wage post</th><th>Δ wage</th>
+            <th>Emp pre</th><th>Emp post</th><th>Δ emp</th>
+            <th>Bill pre</th><th>Bill post</th><th>Δ bill</th>
+          </tr>
+        </thead>
+        <tbody id="tBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Insight cards -->
+  <div class="section">
+    <div class="sec-label">Group-level effects</div>
+    <div class="g4">
+      <div class="ic" style="border-top-color:#2563eb">
+        <div class="ic-hdr"><span class="ic-nm" style="color:#2563eb">♂ Male high</span><span class="badge" style="background:#dbeafe;color:#1e40af">winner</span></div>
+        <p id="ic_mh"></p>
+      </div>
+      <div class="ic" style="border-top-color:#db2777">
+        <div class="ic-hdr"><span class="ic-nm" style="color:#db2777">♀ Female high</span><span class="badge" id="fh_badge"></span></div>
+        <p id="ic_fh"></p>
+      </div>
+      <div class="ic" style="border-top-color:#0891b2">
+        <div class="ic-hdr"><span class="ic-nm" style="color:#0891b2">♂ Male low</span><span class="badge" id="ml_badge"></span></div>
+        <p id="ic_ml"></p>
+      </div>
+      <div class="ic" style="border-top-color:#7c3aed">
+        <div class="ic-hdr"><span class="ic-nm" style="color:#7c3aed">♀ Female low</span><span class="badge" id="fl_badge"></span></div>
+        <p id="ic_fl"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interpretation -->
+  <div class="section">
+    <div class="sec-label">Economic interpretation</div>
+    <div class="card">
+      <div class="g2 interp">
+        <div>
+          <p><b>Baseline discrimination.</b> Each skill tier has its own discrimination coefficient: d<sub>H</sub> for high-skill and d<sub>L</sub> for low-skill women. Firms act as if female workers cost (1+d)·w<sub>F</sub> in each tier. In equilibrium, women earn below their MPL — w<sub>FH</sub> = 1/(1+d<sub>H</sub>) and w<sub>FL</sub> = 1/(1+d<sub>L</sub>) — but employment within each tier is equalized across gender (effective costs are symmetric at 1). The two wage gaps can be calibrated independently.</p>
+          <p><b>High-skill mandate.</b> Forcing w<sub>FH</sub> = w<sub>MH</sub> raises FH wages by d<sub>H</sub>×100% and lifts the firm's effective FH cost to (1+d<sub>H</sub>)·w<sub>MH</sub>. Firms substitute toward MH at rate σ<sub>wH</sub>. The low-skill nest is unaffected directly: w<sub>FL</sub> stays at 1/(1+d<sub>L</sub>) and its effective cost to the firm remains 1, so d<sub>L</sub> and σ<sub>wL</sub> do not drive the policy comparative statics in this experiment.</p>
+        </div>
+        <div>
+          <p><b>The paradox of equal pay.</b> The FH wage bill falls when σ<sub>wH</sub> &gt; 1/d<sub>H</sub>. With separate tier parameters the threshold is governed entirely by the high-skill tier: higher d<sub>H</sub> raises the mandated wage but amplifies the employment distortion, while higher σ<sub>wH</sub> accelerates substitution away from FH. These interact multiplicatively, so the paradox is more likely when both are large.</p>
+          <p><b>Cross-skill spillover.</b> As c<sub>H</sub> rises (driven by d<sub>H</sub> and σ<sub>wH</sub>), the outer nest substitutes toward L at rate σ<sub>b</sub>, mildly lifting ML and FL employment symmetrically. The magnitude depends only on Δc<sub>H</sub> and σ<sub>b</sub> — it is independent of d<sub>L</sub> and σ<sub>wL</sub> in this experiment.</p>
+        </div>
+      </div>
+      <div class="callout">
+        <b>Key comparative statics:</b>
+        d<sub>H</sub> ↑ → larger FH wage gain but stronger employment loss; paradox deepens.
+        σ<sub>wH</sub> ↑ → more aggressive MH/FH substitution.
+        σ<sub>b</sub> ↑ → larger spillover to low-skill groups.
+        d<sub>L</sub> → sets FL baseline wage gap only; does not affect policy employment changes here.
+        σ<sub>wL</sub> → inert for this experiment (c<sub>L</sub> = 2 regardless of σ<sub>wL</sub> when w̃<sub>FL</sub> = 1); becomes active under a joint mandate on both skill tiers.
+      </div>
+      <div class="note">
+        <b>Activating σ<sub>wL</sub> and d<sub>L</sub>:</b> Under the current high-skill-only mandate, FL's effective cost to the firm is (1+d<sub>L</sub>)·w<sub>FL</sub> = 1 both before and after the policy (since w<sub>FL</sub> = 1/(1+d<sub>L</sub>) is unchanged). To bring σ<sub>wL</sub> into play, extend the mandate to also force w<sub>FL</sub> = w<sub>ML</sub>. At that point w̃<sub>FL</sub> rises to (1+d<sub>L</sub>), c<sub>L</sub> increases, and the low-skill nest generates an analogous employment response governed by σ<sub>wL</sub>.
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  Nested CES model · Becker (1957) taste-based discrimination · Share parameters α = β = 0.5 · Output normalized Y = 1
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+"use strict";
+
+// ── Model ─────────────────────────────────────────────────────────────────────
+//
+// Pre-policy invariant: all effective wages = 1, so cH = cL = 2 and all L = 1
+// for any (sWH, sWL, sB). Proof: [2·α^σ]^(1/(1-σ)) = (2^(1-σ))^(1/(1-σ)) = 2.
+//
+// Post-policy (high-skill equal pay only):
+//   wFH_eff = (1+dH)·1 = 1+dH   [mandate raises actual wage to 1]
+//   wFL_eff = (1+dL)·(1/(1+dL)) = 1   [actual wage unchanged]
+
+function computeEquil(sWH, sWL, sB, wFH_eff, wFL_eff) {
+  const a = 0.5, b = 0.5;
+
+  const cH = Math.pow(
+    Math.pow(a, sWH) + Math.pow(a, sWH) * Math.pow(wFH_eff, 1 - sWH),
+    1 / (1 - sWH)
+  );
+  const cL = Math.pow(
+    Math.pow(a, sWL) + Math.pow(a, sWL) * Math.pow(wFL_eff, 1 - sWL),
+    1 / (1 - sWL)
+  );
+  const cY = Math.pow(
+    Math.pow(b, sB) * Math.pow(cH, 1 - sB) +
+    Math.pow(b, sB) * Math.pow(cL, 1 - sB),
+    1 / (1 - sB)
+  );
+
+  const H  = Math.pow(b * cY / cH, sB);
+  const La = Math.pow(b * cY / cL, sB);
+
+  return {
+    LMH: Math.pow(a * cH,            sWH) * H,
+    LFH: Math.pow(a * cH / wFH_eff,  sWH) * H,
+    LML: Math.pow(a * cL,            sWL) * La,
+    LFL: Math.pow(a * cL / wFL_eff,  sWL) * La,
+    H, La, cH, cL, cY
+  };
+}
+
+function pct(from, to) {
+  const p = ((to / from) - 1) * 100;
+  return (p >= 0 ? '+' : '') + p.toFixed(1) + '%';
+}
+
+// ── Charts ────────────────────────────────────────────────────────────────────
+
+const XLABELS = ['Male High', 'Female High', 'Male Low', 'Female Low'];
+
+const baseOpts = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  animation: { duration: 220 },
+  scales: {
+    x: { ticks: { font: { size: 11 }, color: '#94a3b8' }, grid: { display: false } },
+    y: { ticks: { font: { size: 10 }, color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,.18)' } }
+  }
+};
+
+function mkDS(pre, post) {
+  return [
+    { label: 'Pre-policy',  data: pre,  backgroundColor: '#4f46e5', borderRadius: 3 },
+    { label: 'Post-policy', data: post, backgroundColor: '#d97706', borderRadius: 3 }
+  ];
+}
+
+const wChart = new Chart(document.getElementById('wChart'), {
+  type: 'bar',
+  data: { labels: XLABELS, datasets: mkDS([1,1,1,1], [1,1,1,1]) },
+  options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, min: 0, max: 1.3 } } }
+});
+
+const eChart = new Chart(document.getElementById('eChart'), {
+  type: 'bar',
+  data: { labels: XLABELS, datasets: mkDS([1,1,1,1], [1,1,1,1]) },
+  options: baseOpts
+});
+
+const GROUPS = [
+  { key: 'MH', label: '♂ Male high-skill'  },
+  { key: 'FH', label: '♀ Female high-skill' },
+  { key: 'ML', label: '♂ Male low-skill'   },
+  { key: 'FL', label: '♀ Female low-skill'  },
+];
+
+// ── Main update ───────────────────────────────────────────────────────────────
+
+function update() {
+  const dH  = +document.getElementById('dh').value;
+  const dL  = +document.getElementById('dl').value;
+  const sWH = +document.getElementById('swh').value;
+  const sWL = +document.getElementById('swl').value;
+  const sB  = +document.getElementById('sb').value;
+
+  document.getElementById('dhv').textContent  = dH.toFixed(2);
+  document.getElementById('dlv').textContent  = dL.toFixed(2);
+  document.getElementById('swhv').textContent = sWH.toFixed(1);
+  document.getElementById('swlv').textContent = sWL.toFixed(1);
+  document.getElementById('sbv').textContent  = sB.toFixed(2);
+
+  const pre  = computeEquil(sWH, sWL, sB, 1,      1);  // all eff wages = 1
+  const post = computeEquil(sWH, sWL, sB, 1 + dH, 1);  // only FH eff wage rises
+
+  const wPre  = { MH: 1, FH: 1/(1+dH), ML: 1, FL: 1/(1+dL) };
+  const wPost = { MH: 1, FH: 1,        ML: 1, FL: 1/(1+dL) };
+
+  const ep    = { MH: pre.LMH,  FH: pre.LFH,  ML: pre.LML,  FL: pre.LFL  };
+  const epo   = { MH: post.LMH, FH: post.LFH, ML: post.LML, FL: post.LFL };
+
+  const bPre  = { MH: ep.MH*wPre.MH,   FH: ep.FH*wPre.FH,   ML: ep.ML*wPre.ML,   FL: ep.FL*wPre.FL   };
+  const bPost = { MH: epo.MH*wPost.MH, FH: epo.FH*wPost.FH, ML: epo.ML*wPost.ML, FL: epo.FL*wPost.FL };
+
+  // Sidebar
+  document.getElementById('wfhpre').textContent  = (1/(1+dH)).toFixed(3);
+  document.getElementById('wflpre').textContent  = (1/(1+dL)).toFixed(3);
+  document.getElementById('chpre').textContent   = pre.cH.toFixed(3);
+  document.getElementById('chpost').textContent  = post.cH.toFixed(3);
+
+  // Charts
+  wChart.data.datasets[0].data = GROUPS.map(g => +wPre[g.key].toFixed(4));
+  wChart.data.datasets[1].data = GROUPS.map(g => +wPost[g.key].toFixed(4));
+  wChart.update();
+
+  eChart.data.datasets[0].data = GROUPS.map(g => +ep[g.key].toFixed(4));
+  eChart.data.datasets[1].data = GROUPS.map(g => +epo[g.key].toFixed(4));
+  eChart.update();
+
+  // Table
+  const tbody = document.getElementById('tBody');
+  tbody.innerHTML = '';
+  GROUPS.forEach(({ key, label }) => {
+    const cls = v => v > 0.05 ? 'up' : v < -0.05 ? 'dn' : 'nt';
+    const dw  = ((wPost[key] / wPre[key]) - 1) * 100;
+    const de  = ((epo[key]  / ep[key])   - 1) * 100;
+    const db  = ((bPost[key] / bPre[key]) - 1) * 100;
+    const fmt = v => (v >= 0 ? '+' : '') + v.toFixed(1) + '%';
+    const tr  = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${label}</td>
+      <td>${wPre[key].toFixed(3)}</td><td>${wPost[key].toFixed(3)}</td><td class="${cls(dw)}">${fmt(dw)}</td>
+      <td>${ep[key].toFixed(3)}</td><td>${epo[key].toFixed(3)}</td><td class="${cls(de)}">${fmt(de)}</td>
+      <td>${bPre[key].toFixed(3)}</td><td>${bPost[key].toFixed(3)}</td><td class="${cls(db)}">${fmt(db)}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  // Insight cards
+  document.getElementById('ic_mh').textContent =
+    `Wage unchanged. Employment ${pct(ep.MH, epo.MH)}: firms substitute away from FH ` +
+    `(effective cost rises to ${(1+dH).toFixed(2)}·w). ` +
+    `Response governed by dH = ${dH.toFixed(2)} and σwH = ${sWH}.`;
+
+  const fhBill = bPost.FH < bPre.FH;
+  const fhb = document.getElementById('fh_badge');
+  fhb.textContent  = fhBill ? 'paradox' : 'net gain';
+  fhb.style.cssText = fhBill
+    ? 'font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#fef3c7;color:#92400e'
+    : 'font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#166534';
+  document.getElementById('ic_fh').textContent =
+    `Wage +${(dH*100).toFixed(0)}%. Employment ${pct(ep.FH, epo.FH)}. ` +
+    `Group wage bill ${pct(bPre.FH, bPost.FH)} — ` +
+    `paradox when σwH > 1/dH = ${(1/dH).toFixed(1)} (current σwH = ${sWH}).`;
+
+  const mlUp = epo.ML > ep.ML * 1.001;
+  ['ml_badge','fl_badge'].forEach(id => {
+    const el = document.getElementById(id);
+    el.textContent  = mlUp ? 'mild gain' : 'mild loss';
+    el.style.cssText = mlUp
+      ? 'font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#dbeafe;color:#1e40af'
+      : 'font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#fee2e2;color:#991b1b';
+  });
+  document.getElementById('ic_ml').textContent =
+    `No direct wage effect. Employment ${pct(ep.ML, epo.ML)}: ` +
+    `outer nest shifts toward L as cH rises ${pre.cH.toFixed(3)}→${post.cH.toFixed(3)} (σb = ${sB}).`;
+  document.getElementById('ic_fl').textContent =
+    `Wage fixed at ${(1/(1+dL)).toFixed(3)} = 1/(1+dL); mandate does not apply. ` +
+    `Employment ${pct(ep.FL, epo.FL)}: outer-nest channel only. ` +
+    `dL = ${dL.toFixed(2)} sets the wage gap but not the employment response here.`;
+
+  // Encode parameters in URL
+  const url = new URL(window.location);
+  ['dh','dl','swh','swl','sb'].forEach((k,i) =>
+    url.searchParams.set(k, [dH,dL,sWH,sWL,sB][i])
+  );
+  history.replaceState(null, '', url);
+}
+
+// ── Init from URL ─────────────────────────────────────────────────────────────
+
+(function initFromURL() {
+  const p = new URLSearchParams(window.location.search);
+  const clamp = (v, lo, hi) => isNaN(v) ? null : Math.min(hi, Math.max(lo, v));
+  [['dh','dh',0.02,0.6],['dl','dl',0.02,0.6],
+   ['swh','swh',1.5,10],['swl','swl',1.5,10],['sb','sb',0.1,0.95]
+  ].forEach(([id, key, lo, hi]) => {
+    if (p.has(key)) {
+      const v = clamp(+p.get(key), lo, hi);
+      if (v !== null) document.getElementById(id).value = v;
+    }
+  });
+})();
+
+update();
+['dh','dl','swh','swl','sb'].forEach(id =>
+  document.getElementById(id).addEventListener('input', update)
+);
+
+// ── Share ─────────────────────────────────────────────────────────────────────
+
+function copyLink() {
+  const show = () => {
+    const m = document.getElementById('copyMsg');
+    m.style.display = 'block';
+    setTimeout(() => { m.style.display = 'none'; }, 2800);
+  };
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(window.location.href).then(show).catch(() => { fallback(); show(); });
+  } else { fallback(); show(); }
+}
+function fallback() {
+  const i = Object.assign(document.createElement('input'), { value: window.location.href });
+  document.body.appendChild(i); i.select(); document.execCommand('copy'); document.body.removeChild(i);
+}
+</script>
+</body>
+</html>
